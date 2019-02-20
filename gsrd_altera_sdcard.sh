@@ -11,7 +11,11 @@
 yellow='\E[1;33m'
 NC='\033[0m'
 
-# Parameters ##################################
+# Enviroment ###################################################################
+export CROSS_COMPILE=/media/alex/Develop/BSP/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux/bin/arm-linux-gnueabihf-
+export PATH=$PATH:/home/alex/intelFPGA/18.1/quartus/sopc_builder/bin
+
+# Parameters ###################################################################
 # SD Card
 sdcard_partition_number_fat32="1"
 sdcard_partition_number_ext3="2"
@@ -52,6 +56,10 @@ cp ../software/buildroot/output/images/${root_fs} ../software/sdcard/ext3-sdX2
 # Partition 3 - a2
 mkdir -p ../software/sdcard/a2-sdX3
 cp ../software/spl_bsp/${preloader_file}${preloader_file} ../software/sdcard/a2-sdX3
+
+# Userspace header files
+mkdir -p ../software/userspace
+sopc-create-header-files gr_soc.sopcinfo --single software/userspace/hps_0.h --module hps_0
 
 # SD Card formatting
 lsblk
