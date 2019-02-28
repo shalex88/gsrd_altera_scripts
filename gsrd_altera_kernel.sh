@@ -1,7 +1,7 @@
 #!/bi/bash
 #
 # Creating BSP for Altera Cyclone5 GSRD
-# Usage: source gsrd_altera_setup.sh
+# Usage: call from linux source directory or from where you want to place it
 
 yellow='\E[1;33m'
 NC='\033[0m'
@@ -35,8 +35,9 @@ function compilation
   export CROSS_COMPILE=${toolchain_path}/bin/arm-linux-gnueabihf-
   export ARCH=arm
   make socfpga_defconfig
-  make ${dts}
-  make zImage
+  make menuconfig
+  # make ${dts} #?
+  make LOCALVERSION= zImage
 }
 
 ### Main ###
