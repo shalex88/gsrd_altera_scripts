@@ -50,14 +50,19 @@ function start_eds_shell
 
 function preloader
 {
-  start_eds_shell
-  cd ${quartus_proj_abs}
-  # pwd
+  echo -e "${yellow}Start EDS shell? [y/n]${NC}"
+  read yn
+  if [ ${yn} == "y" ]
+  then
+    start_eds_shell
+  fi
+  pushd ${quartus_proj_abs}
   bsp-editor #File->New HPS BSP, choose hps_isw_handoff. Add FAT support. Generate
-  cd ${spl_dir_abs}
-  # pwd
+  pushd ${spl_dir_abs}
   # exit
-  make -j4 #generates preloader-mkpimage.bin and uboot-socfpga directory already with needed files!
+  make #generates preloader-mkpimage.bin and uboot-socfpga directory already with needed files!
+  popd
+  popd
 }
 
 function qts_filter
