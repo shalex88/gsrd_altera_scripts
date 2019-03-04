@@ -42,19 +42,22 @@ function download
 
 function start_eds_shell
 {
-  eds=$(sudo find ~ -name embedded_command_shell.sh) #ToDo: edit the file and comment the last line
+  eds=$(sudo find ~ -name embedded_command_shell.sh) #ToDo: edit the the shell script file, comment bash command
   cd $(dirname ${eds})
   . ${eds}
+  # sleep 1
 }
 
 function preloader
 {
   start_eds_shell
   cd ${quartus_proj_abs}
+  # pwd
   bsp-editor #File->New HPS BSP, choose hps_isw_handoff. Add FAT support. Generate
   cd ${spl_dir_abs}
+  # pwd
   # exit
-  make #generates preloader-mkpimage.bin and uboot-socfpga directory already with needed files!
+  make -j4 #generates preloader-mkpimage.bin and uboot-socfpga directory already with needed files!
 }
 
 function qts_filter
@@ -78,7 +81,7 @@ function uboot_compilation
   else
     make socfpga_cyclone5_config
   fi
-  make
+  make -j4
 }
 
 function uboot_mainline_conf
@@ -138,12 +141,19 @@ function uboot_ghrd_custom_conf
 }
 
 ### Main ###
+# start_eds_shell
 echo -e "${yellow}1. Generate preloader? [y/n]${NC}"
 read yn
 if [ ${yn} == "y" ]
 then
   echo -e "${yellow}Compiling..${NC}"
-  preloader
+  if preloader
+  then
+    echo -e "${yellow}Success!!${NC}"
+  else
+    echo -e "${yellow}Error!!${NC}"
+    return
+  fi
 fi
 
 echo -e "${yellow}2. Use mainline u-boot instead of the default GHRD uboot-socfpga? [y/n]${NC}"
@@ -156,7 +166,13 @@ then
   read yn
   if [ ${yn} == "y" ]
   then
-    download
+    if download
+    then
+    echo -e "${yellow}Success!!${NC}"
+    else
+    echo -e "${yellow}Error!!${NC}"
+    return
+    fi
   fi
   # cd ${uboot_dir} #uboot dir
 else
@@ -188,7 +204,13 @@ read yn
 if [ ${yn} == "y" ]
 then
   echo -e "${yellow}Compiling..${NC}"
-  uboot_compilation
+  if uboot_compilation
+  then
+    echo -e "${yellow}Success!!${NC}"
+  else
+    echo -e "${yellow}Error!!${NC}"
+    return
+  fi
 fi
 
 

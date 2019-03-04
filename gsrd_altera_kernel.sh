@@ -34,20 +34,46 @@ function compilation
 {
   export CROSS_COMPILE=${toolchain_path}/bin/arm-linux-gnueabihf-
   export ARCH=arm
+  echo -e "${yellow}Clean previous builds? [y/n]${NC}"
+  read yn
+  if [ ${yn} == "y" ]
+  then
+    make mrproper
+  fi
   make socfpga_defconfig
   make menuconfig
-  # make ${dts} #?
-  make LOCALVERSION= zImage
+  make ${dts} #?
+  # make -j4 LOCALVERSION= zImage
+  if make zImage
+  then
+    echo -e "${yellow}Success!!${NC}"
+  else
+    echo -e "${yellow}Error!!${NC}"
+    cd ${quartus_proj_abs}
+    return 1
+  fi
 }
 
 ### Main ###
+mkdir -p software
+cd software
+
 echo -e "${yellow}1. Download linux source for Altera Socfpga? [y/n]${NC}"
 read yn
 if [ ${yn} == "y" ]
 then
-  download
-  cd ${repo_dir}
+  if download
+  then
+    echo -e "${yellow}Success!!${NC}"
+  else
+    echo -e "${yellow}Error!!${NC}"
+    cd ${quartus_proj_abs}
+    return 1
+  fi
 fi
+
+
+cd ${repo_dir}
 
 echo -e "${yellow}2. Compile? [y/n]${NC}"
 read yn
@@ -66,4 +92,5 @@ then
   cp ./arch/arm/boot/dts/${dts} ./../${output_dir}/${dts}
 fi
 
+cd ${quartus_proj_abs}
 echo -e "${yellow}Linux kernel is ready!${NC}"
