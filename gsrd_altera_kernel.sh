@@ -6,7 +6,7 @@
 yellow='\E[1;33m'
 NC='\033[0m'
 
-### Parameters ###
+### Parameters #############################################################
 toolchain_path="/media/alex/Develop/BSP/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux"
 url="https://github.com/altera-opensource/linux-socfpga.git"
 branch="socfpga-4.9.76-ltsi-rt"
@@ -14,7 +14,7 @@ repo_dir="linux-socfpga"
 output_dir="output"
 dts="socfpga_cyclone5_de0_sockit.dtb"
 
-### Functions ###
+### Functions #############################################################
 function download
 {
   echo -e "${yellow}Default branch:${NC} ${branch}"
@@ -54,7 +54,7 @@ function compilation
   fi
 }
 
-### Main ###
+### Main #############################################################
 mkdir -p software
 cd software
 

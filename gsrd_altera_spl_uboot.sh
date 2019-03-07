@@ -7,7 +7,7 @@
 yellow='\E[1;33m'
 NC='\033[0m'
 
-### Parameters ###
+### Parameters #############################################################
 toolchain_path="/media/alex/Develop/BSP/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux" #ToDo: find the directory instead of path
 uboot_url="git://git.denx.de/u-boot.git"
 uboot_dir="uboot-socfpga"
@@ -22,8 +22,10 @@ export CROSS_COMPILE=${toolchain_path}/bin/arm-linux-gnueabihf-
 export PATH=$PATH:${toolchain_tools_path}
 board_vendor="gr"
 board_name="gr-soc"
+proj_name_ext=$(find . -type f -name *.sopcinfo -printf "%f\n")
+proj_name=$(echo ${proj_name_ext%.*})
 
-### Functions ###
+### Functions #############################################################
 function download
 {
   cd ${spl_dir_abs}
@@ -40,22 +42,38 @@ function download
   git clone -b ${uboot_branch} ${uboot_url} ${uboot_dir}
 }
 
+function dts_create
+{
+  # swapping hps_common_board_info.xml & board_info_DE0_NANO_SOC.xml does work :
+  #   ---------
+  #   sopc2dts --input soc_system.sopcinfo
+  #   --output soc_system.dts
+  #   --type dts
+  #   --board hps_common_board_info.xml
+  #   --board board_info_DE0_NANO_SOC.xml
+  #   --bridge-removal all
+  #   --clocks
+  # ----
+
+  # sopc2dts -v --input gr_soc.sopcinfo --output gr-soc.dts --type dts --board soc_system_board_info.xml --board hps_common_board_info.xml --bridge-removal all --clocks
+
+
+  sopc2dts -v --input ${proj_name}.sopcinfo --output ${proj_name}.dts --type dts --board soc_system_board_info.xml --bridge-removal none --clocks
+
+  # dtc -I dts -O dtb -o ../software/sdcard/fat32-sdX1/socfpga_cyclone5_gr_soc.dtb ../gr_soc.dts
+  dtc -I dts -O dtb -o socfpga.dtb ${proj_name}.dts #dts to dtb
+}
 function start_eds_shell
 {
-  eds=$(sudo find ~ -name embedded_command_shell.sh) #ToDo: edit the the shell script file, comment bash command
-  cd $(dirname ${eds})
-  . ${eds}
-  # sleep 1
+  # eds=$(sudo find ~ -name embedded_command_shell.sh) #ToDo: edit the the shell script file, comment bash command
+  # pushd $(dirname ${eds})
+  # . ${eds} &
+  # sleep 2
+  find ~ -name "embedded_command_shell.sh" -exec chmod +x {} \; -exec {} \;
 }
 
 function preloader
 {
-  echo -e "${yellow}Start EDS shell? [y/n]${NC}"
-  read yn
-  if [ ${yn} == "y" ]
-  then
-    start_eds_shell
-  fi
   pushd ${quartus_proj_abs}
   bsp-editor #File->New HPS BSP, choose hps_isw_handoff. Add FAT support. Generate
   pushd ${spl_dir_abs}
@@ -147,12 +165,36 @@ function uboot_ghrd_custom_conf
 
 ### Main ###
 # start_eds_shell
+echo ${proj_name}
+
+echo -e "${yellow}1. Start EDS shell? [y/n]${NC}"
+echo -e "${yellow}!!! If yes the script will be aborted, to continue run it once more and choose 'n' ${NC}"
+read yn
+if [ ${yn} == "y" ]
+then
+  start_eds_shell
+fi
+
 echo -e "${yellow}1. Generate preloader? [y/n]${NC}"
 read yn
 if [ ${yn} == "y" ]
 then
   echo -e "${yellow}Compiling..${NC}"
   if preloader
+  then
+    echo -e "${yellow}Success!!${NC}"
+  else
+    echo -e "${yellow}Error!!${NC}"
+    return
+  fi
+fi
+
+echo -e "${yellow}0. Generate device tree? [y/n]${NC}"
+read yn
+if [ ${yn} == "y" ]
+then
+  echo -e "${yellow}Compiling..${NC}"
+  if dts_create
   then
     echo -e "${yellow}Success!!${NC}"
   else
