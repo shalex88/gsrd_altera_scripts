@@ -8,7 +8,7 @@ yellow='\E[1;33m'
 NC='\033[0m'
 
 ### Parameters #############################################################
-toolchain_path="/media/alex/Develop/BSP/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux" #ToDo: find the directory instead of path
+toolchain_path="~/Software/toolchain/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux" #ToDo: find the directory instead of path
 uboot_url="git://git.denx.de/u-boot.git"
 uboot_dir="uboot-socfpga"
 output_dir="output"
