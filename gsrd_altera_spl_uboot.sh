@@ -8,7 +8,8 @@ yellow='\E[1;33m'
 NC='\033[0m'
 
 ### Parameters #############################################################
-toolchain_path="~/Software/toolchain/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux" #ToDo: find the directory instead of path
+# toolchain_path="~/Software/toolchain/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux" #ToDo: find the directory instead of path
+toolchain_path=$(find ~ -type d -name gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux 2>/dev/null)
 uboot_url="git://git.denx.de/u-boot.git"
 uboot_dir="uboot-socfpga"
 output_dir="output"
@@ -19,7 +20,7 @@ quartus_proj_abs=$(pwd)
 spl_dir_abs=${quartus_proj_abs}/software/spl_bsp
 script_dir_abs="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export CROSS_COMPILE=${toolchain_path}/bin/arm-linux-gnueabihf-
-export PATH=$PATH:${toolchain_tools_path}
+export PATH=$PATH:${toolchain_path}
 board_vendor="gr"
 board_name="gr-soc"
 proj_name_ext=$(find . -type f -name *.sopcinfo -printf "%f\n")
@@ -69,7 +70,10 @@ function start_eds_shell
   # pushd $(dirname ${eds})
   # . ${eds} &
   # sleep 2
-  find ~ -name "embedded_command_shell.sh" -exec chmod +x {} \; -exec {} \;
+  shell=$(find ~ -name "embedded_command_shell.sh" 2>/dev/null)
+  # chmod +x ${shell}
+  exec ${shell}
+  # $shell -exec chmod +x {} \; -exec {} \;
 }
 
 function preloader

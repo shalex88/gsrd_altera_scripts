@@ -7,7 +7,7 @@ yellow='\E[1;33m'
 NC='\033[0m'
 
 ### Parameters #############################################################
-toolchain_path="~/Software/toolchain/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux"
+toolchain_path=$(find ~ -type d -name gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux 2>/dev/null)
 url="https://github.com/altera-opensource/linux-socfpga.git"
 branch="socfpga-4.9.76-ltsi-rt"
 repo_dir="linux-socfpga"

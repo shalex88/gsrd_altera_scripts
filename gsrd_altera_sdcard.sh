@@ -12,9 +12,9 @@ yellow='\E[1;33m'
 NC='\033[0m'
 
 # Enviroment ###################################################################
-toolchain_path="/media/alex/Develop/BSP/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux"
+toolchain_path=$(find ~ -type d -name gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux 2>/dev/null)
 export CROSS_COMPILE=${toolchain_path}/bin/arm-linux-gnueabihf-
-export PATH=$PATH:/home/alex/intelFPGA/18.1/quartus/sopc_builder/bin
+export PATH=$PATH:$(find -type d -name sopc_builder 2>/dev/null)/bin
 
 # Parameters ###################################################################
 # SD Card
