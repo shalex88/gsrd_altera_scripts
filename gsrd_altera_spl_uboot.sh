@@ -8,8 +8,8 @@ yellow='\E[1;33m'
 NC='\033[0m'
 
 ### Parameters #############################################################
-# toolchain_path="~/Software/toolchain/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux" #ToDo: find the directory instead of path
-toolchain_path=$(find ~ -type d -name gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux 2>/dev/null)
+toolchain_path="/media/alex/Develop/BSP/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux" #ToDo: find the directory instead of path
+# toolchain_path=$(find ~ -type d -name gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux 2>/dev/null)
 uboot_url="git://git.denx.de/u-boot.git"
 uboot_dir="uboot-socfpga"
 output_dir="output"
@@ -25,6 +25,7 @@ board_vendor="gr"
 board_name="gr-soc"
 proj_name_ext=$(find . -type f -name *.sopcinfo -printf "%f\n")
 proj_name=$(echo ${proj_name_ext%.*})
+dtb="socfpga"
 
 ### Functions #############################################################
 function download
@@ -57,12 +58,9 @@ function dts_create
   # ----
 
   # sopc2dts -v --input gr_soc.sopcinfo --output gr-soc.dts --type dts --board soc_system_board_info.xml --board hps_common_board_info.xml --bridge-removal all --clocks
-
-
   sopc2dts -v --input ${proj_name}.sopcinfo --output ${proj_name}.dts --type dts --board soc_system_board_info.xml --bridge-removal none --clocks
-
   # dtc -I dts -O dtb -o ../software/sdcard/fat32-sdX1/socfpga_cyclone5_gr_soc.dtb ../gr_soc.dts
-  dtc -I dts -O dtb -o socfpga.dtb ${proj_name}.dts #dts to dtb
+  dtc -I dts -O dtb -o ${dtb}.dtb ${proj_name}.dts #dts to dtb
 }
 function start_eds_shell
 {
@@ -134,7 +132,7 @@ function uboot_ghrd_conf
   sed -i "s/CONFIG_EPHY1_PHY_ADDR/CONFIG_EPHY0_PHY_ADDR/g" include/configs/socfpga_cyclone5.h
   #Change U-boot promt
   sed -i "s/SOCFPGA_CYCLONE5 #/GR_SOC #/g" include/configs/socfpga_cyclone5.h
-  sed -i "s/Altera SOCFPGA Cyclone V Board/GR SOC Board/g" board/altera/socfpga/socfpga_cyclone5.c
+  sed -i "s/Altera SOCFPGA Cyclone V Board/GR Optics Board/g" board/altera/socfpga/socfpga_cyclone5.c
 }
 
 function uboot_ghrd_custom_conf
@@ -179,7 +177,7 @@ then
   start_eds_shell
 fi
 
-echo -e "${yellow}1. Generate preloader? [y/n]${NC}"
+echo -e "${yellow}2. Generate preloader? [y/n]${NC}"
 read yn
 if [ ${yn} == "y" ]
 then
@@ -193,7 +191,7 @@ then
   fi
 fi
 
-echo -e "${yellow}0. Generate device tree? [y/n]${NC}"
+echo -e "${yellow}3. Generate device tree? [y/n]${NC}"
 read yn
 if [ ${yn} == "y" ]
 then
@@ -207,7 +205,7 @@ then
   fi
 fi
 
-echo -e "${yellow}2. Use mainline u-boot instead of the default GHRD uboot-socfpga? [y/n]${NC}"
+echo -e "${yellow}4. Use mainline u-boot instead of the default GHRD uboot-socfpga? [y/n]${NC}"
 read yn
 if [ ${yn} == "y" ]
 then
@@ -231,7 +229,7 @@ else
   # cd ${uboot_dir} #uboot-socfpga dir
 fi
 
-echo -e "${yellow}4. Configure? [y/n]${NC}"
+echo -e "${yellow}5. Configure? [y/n]${NC}"
 read yn
 if [ ${yn} == "y" ]
 then
@@ -250,7 +248,7 @@ then
   fi
 fi
 
-echo -e "${yellow}5. Compile? [y/n]${NC}"
+echo -e "${yellow}6. Compile? [y/n]${NC}"
 read yn
 if [ ${yn} == "y" ]
 then
@@ -265,15 +263,19 @@ then
 fi
 
 
-echo -e "${yellow}6. Copy output file to ${output_dir} directory? [y/n]${NC}"
+echo -e "${yellow}7. Copy output file to ${output_dir} directory? [y/n]${NC}"
 read yn
 if [ ${yn} == "y" ]
 then
   cd ${quartus_proj_abs}/software
   mkdir -p ${output_dir}
+  cp ${quartus_proj_abs}/${dtb}.dtb ${quartus_proj_abs}/software/${output_dir}/${dtb}.dtb
+  echo -e "${yellow}Binary Device Tree:${NC} ${quartus_proj_abs}/software/${output_dir}/${dtb}.dtb"
   cp ${spl_dir_abs}/${uboot_dir}/${uboot_img} ${quartus_proj_abs}/software/${output_dir}/${uboot_img}
+  echo -e "${yellow}Uboot image:${NC} ${quartus_proj_abs}/software/${output_dir}/${uboot_img}"
   cp ${spl_dir_abs}/${preloader_file} ${quartus_proj_abs}/software/${output_dir}/${preloader_file}
+  echo -e "${yellow}Preloader image:${NC} ${quartus_proj_abs}/software/${output_dir}/${preloader_file}"
 fi
 
 cd ${quartus_proj_abs} #go to initial dir
-echo -e "${yellow}U-boot is ready!${NC}"
+echo -e "${yellow}Finished!${NC}"
